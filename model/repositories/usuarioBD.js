@@ -1,6 +1,6 @@
-const usuarioBD = require('./db.js');
+const usuarioBD = require('./db');
 const seguranca = require('../components/seguranca');
-const usuario = require('../../controller/routes/usuario.js');
+const usuario = require('../../controller/routes/usuario');
 
 async function selectUsuario(){
     const conn = await usuarioBD.connect();
@@ -11,7 +11,7 @@ async function selectUsuario(){
 async function getUsuario(id){
     const conn = await usuarioBD.connect();
     const sql = 'SELECT * FROM usuario WHERE id =?';
-    const value = [id];
+    const values = [id];
     const[rows] = await conn.query(sql,values);
     if(rows.lenght > 0)
       return rows[0];
@@ -21,7 +21,7 @@ async function getUsuario(id){
 async function login(nome, senha){
     const conn = await usuarioBD.connect();
     const sql = 'SELECT * FROM usuario WHERE nome = ? and senha=?';
-    const value = [nome, seguranca.ocultarSenha(senha)];
+    const values = [nome, seguranca.ocultarSenha(senha)];
     const [rows] = await conn.query(sql, values);
     if(rows.length>0)
        return rows;
@@ -31,11 +31,11 @@ async function login(nome, senha){
 async function insertUsuario(usuario){
     const conn = await usuarioBD.connect();
     const sql = 'INSERT INTO usuario(nome, senha) VALUES (?,?)';
-    const vales = [usuario.nome, seguranca.ocultarSenha(usuario.senha)];
+    const values = [usuario.nome, seguranca.ocultarSenha(usuario.senha)];
     return await conn.query(sql, values);
 }
 
-async function deleteUsuario(){
+async function deleteUsuario(id){
     const conn = await usuarioBD.connect();
     const sql = 'DELETE FROM usuario where id=?;';
     return await conn.query(sql,[id]);
