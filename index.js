@@ -4,7 +4,7 @@ const app = express();
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs')
 var path = require('path');
-app.set('views', path.join(__dirname, '/view/'));
+app.set('views', path.join(__dirname, '/view'));
 
 bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));

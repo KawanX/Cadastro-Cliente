@@ -41,11 +41,10 @@ async function deleteUsuario(id){
     return await conn.query(sql,[id]);
 }
 
-async function updateUsuario(){
-    const conn = await usuarioBD.connect();
-    const sql = 'UPDATE INTO (nome = ?, senha = ?) WHERE id = ?;';
-    const values = [usuario.nome, senha.ocultarSenha(usuario.senha)];
+async function updateUsuario(id, usuario){
+    const conn = await usuarioDB.connect();
+    const sql = 'UPDATE usuario SET nome=?, senha=? WHERE id=?';
+    const values = [usuario.nome, usuario.senha, id];
     return await conn.query(sql, values);
 }
-
 module.exports = {selectUsuario,insertUsuario,deleteUsuario,updateUsuario,getUsuario,login};
