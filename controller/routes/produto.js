@@ -1,73 +1,75 @@
-const produtoBD = require('../../model/repositories/produtoBD.js');
-const seguranca = require('../../model/components/seguranca.js');
+const produtoBanco = require('../../model/repositories/produtoBD');
 
-module.exports = function (app) {
-    app.get("/cadastro", function (req, res) {
-        if (req.query.fail)
-            res.render('produto/Cadastro', { mensagem: 'Cadastro' });
+module.exports = function (app){
+
+    app.get("/", function(req, resp){
+        resp.send("<h1>Bem-vindo ao meu app</h1>");
+    })
+   
+    app.get('/.cadastro', function (req, res){
+        if(req.query.fail) 
+            res.render('produto/CadastroProduto', {mensagem: 'Cadastro'});
         else
-            res.render('produto/Cadastro', { mensagem: null });
+            res.render('produto/CadastroProduto', {mensagem: null});
+
     })
 
-    app.post("/cadastro/produto/edit/salvar", (req, res) => {
-        var produto = {
-            id: req.body.id,
+    app.post('/cadastro/produto/edit/salvar', (req, res) => {
+        var produto = { 
             nome: req.body.nome,
             quantidade: req.body.quantidade,
-            preco: req.body.preco
+            preco: req.body.preco,
+            id: req.body.id
         };
-
         try {
             produtoBanco.updateProduto(produto);
-            res.render('produto/Sucesso', { mensagem: 'alterado' });
-        } catch (error) {
-            res.render('produto/EditProduto', { title: 'Edicao Cadastro', mensagem: 'Erro no cadastro' });
+            res.render('produto/Sucesso', {mensagem: 'alterado'});
+        } catch (error){
+            res.render('produto/EditProduto', {title: 'Edição Cadastro', mensagem: "Erro no cadastro"})
         }
-    });
+    })
 
-    app.post("/cadastro/produto/salvar", (req, res) => {
+    app.post('/cadastro/produto/salvar', (req, res) => {
         try {
-            var produto = {
-                nome: req.body.nome,
-                quantidade: req.body.quantidade,
-                preco: req.body.preco
-            };
-
+            var produto = {nome: req.body.nome,
+                           quantidade: req.body.quantidade,
+                            preco: req.body.preco}
             produtoBanco.insertProduto(produto);
-        } catch (error) {
-            console.log(error);
-            res.render('produto/Cadastro', { title: 'Cadastro', mensagem: 'Erro no cadastro' });
+            res.render('produto/Sucesso', {mensagem: 'cadastrado'});
+        } catch (error){
+            res.render('produto/CadastroProduto', { title: 'Cadastro', mensagem: "Erro no cadastro"})
         }
-    });
+    })
 
-    app.get("/lista/produto", function (req, res, next) {
-        try {
+    app.get('/lista/produto', async (req, res, next) => {
+        try{
             const docs = await produtoBanco.selectProduto();
-            res.render('produto/Lista', { mensagem: 'Lista de Produtos', docs });
-        } catch (err) {
+            res.render('produto/Lista', { mensagem: 'Lista de Produto', docs });
+        } catch (err){
             next(err);
         }
     });
 
-    app.get("/delete/produto/:id", function (req, res, next) {
-        try {
+    app.get('/delete/produto/:id', async (req, res, next) => {
+        try{
             var id = req.params.id;
             await produtoBanco.deleteProduto(id);
             const docs = await produtoBanco.selectProduto();
-            res.render('produto/Lista', { mensagem: 'Produto excluido com sucesso', docs });
-        } catch (err) {
+            res.render('produto/Lista', { mensagem: 'Usuário excluído com sucesso', docs });
+        } catch (err){
             next(err);
         }
     });
 
-    app.get("/edit/produto/:id", function (req, res, next) {
-        try {
+    app.get('/edit/produto/:id', async (req, res, next) => {
+        try{
             var id = req.params.id;
-            const docs = await produtoBanco.getProdutoId(id);
+            const produto = await produtoBanco.getProdutoId(id);
             res.render('produto/EditProduto', { mensagem: '', produto });
-        } catch (err) {
+        } catch (err){
             next(err);
         }
     });
-}
 
+
+}

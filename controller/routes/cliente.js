@@ -1,83 +1,78 @@
-const usuarioBD = require('../../model/repositories/usuarioBD.js');
-const seguranca = require('../../model/components/seguranca.js');
+const seguranca = require('../../model/components/seguranca')
+const clienteBanco = require('../../model/repositories/clienteDB')
 
-module.exports = function(app){
- 
-    app.get('/login', function(req, res){
-        if(req.query.fail)
-            res.render('usuario/Login', {mensagemLogin:'Usuario e/ou senha incorretos!'});
-        else 
-        res.render('usuario/Login',{mensagemLogin: null});
+module.exports = function (app){
+
+    app.get("/", function(req, resp){
+        resp.send("<h1>Bem-vindo ao meu app</h1>");
     })
-
-    app.post('/login/executar',(req,res)=>{
-        if(req.body.nome === "Kawan"
-         && req.body.senha === "123")
-          res.render('usuario/Lista', {mensagem: 'cadastrado'});
-          else
-          res.render('login/?fail=true');
-    })
-
-    app.get('/cadastro', function(req,res){
-        if(req.query.fail)
-          res.render('usuario/CadastroUsuario',{mensagem: 'CadastroUsuario'});
+   
+    app.get('/..cadastro', function (req, res){
+        if(req.query.fail) 
+            res.render('cliente/CadastroCliente', {mensagem: 'Cadastro'});
         else
-          res.render('usuario/CadastroUsuario', {mensagem: null});
+            res.render('cliente/CadastroCliente', {mensagem: null});
+
     })
 
-    app.post('/cadastro/usuario/edit/salvar', (req, res)=>{
-        var usuario = {nome: req.body.nome,
-        senha: req.body.senha,
-        id: req.body.id};
-        try{
-            usuarioBD.updateUsuario(usuario);
-            res.render('usuario/Sucesso', {mensagem: 'alterado'});
-        } catch{
-            res.render('usuario/EditUsuario', {title: 'Edicao Cadastro',
-            mensagem: 'Erro no cadastrado'});
+    app.post('/cadastro/cliente/edit/salvar', (req, res) => {
+        var cliente = { 
+            nome: req.body.nome,
+            senha: req.body.senha,
+            id: req.body.id
+        };
+        try {
+            clienteBanco.updateCliente(cliente);
+            res.render('cliente/Sucesso', {mensagem: 'alterado'});
+        } catch (error){
+            res.render('cliente/EditCliente', {title: 'Edição Cadastro', mensagem: "Erro no cadastro"})
         }
-    });
+    })
 
-    app.post('/cadastro/usuario/salvar', (req, res) =>{
-        try{
-            var usuario = {nome: req.body.nome,
-                senha: seguranca.ocultarSenha(req.body.senha)}
-            usuarioBD.insertUsuario(usuario);
-            res.render('usuario/Sucesso',{mensagem:'cadastrado'});
-        } catch(error){
-            console.log(error);
-            res.render('usuario/CadastroUsuario', {title: 'Cadastro',
-               mensagem:'Erro no Cadastro'});
+    app.post('/cadastro/cliente/salvar', seguranca.autenticar, (req, res) => {
+        try {
+            var cliente = {nome: req.body.nome,
+                           senha: seguranca.ocultarsenha(req.body.senha)}
+            clienteBanco.insertCliente(cliente);
+            res.render('cliente/Sucesso', {mensagem: 'cadastrado'});
+        } catch (error){
+            res.render('cliente/CadastroCliente', { title: 'Cadastro', mensagem: "Erro no cadastro"})
         }
-    });
+    })
 
-    app.get('/lista/usuario', async(req,res,next)=>{
+    app.get('/lista/cliente', seguranca.autenticar, async (req, res, next) => {
         try{
-            const docs = await usuarioBD.selectUsuario();
-            res.render('usuario/Lista',{mensagem: 'Lista de Usuario', docs});
-        }catch(err){
+            const docs = await cliente.selectCliente();
+            res.render('cliente/Lista', { mensagem: 'Lista de Usuário', docs });
+        } catch (err){
             next(err);
         }
     });
-    
-    app.get('/delete/usuario/:id', async(req,res,next)=>{
+
+    app.get('/delete/cliente/:id', seguranca.autenticar, async (req, res, next) => {
         try{
             var id = req.params.id;
-            await usuarioBD.deleteUsuario(id);
-            const docs = await usuarioBD.selectUsuario();
-            res.render('usuario/Lista', {mensagem: "Usuario excluido com sucesso", docs });
-        } catch(err){
+            await clienteBanco.deleteCliente(id);
+            const docs = await cliente.selectCliente();
+            res.render('cliente/Lista', { mensagem: 'Usuário excluído com sucesso', docs });
+        } catch (err){
             next(err);
         }
     });
 
-    app.get('/edit/usuario/:id', async(req,res,next)=>{
+    app.get('/edit/cliente/:id', seguranca.autenticar, async (req, res, next) => {
         try{
             var id = req.params.id;
-            const usuario = await usuarioBD.getUsuarioId(id);
-            res.render('usuario/EditUsuario',{mensagem: '', usuario});
-        } catch(err){
+            const cliente = await cliente.getClienteId(id);
+            res.render('cliente/EditCliente', { mensagem: '', cliente });
+        } catch (err){
             next(err);
         }
     });
+
+    app.get('/.login', function (req, res) {
+        if(req.query.fail) res.render('cliente/Login', { mensagemLogin: 'Usúario e/ou senha incorretos!'});
+        else res.render('cliente/Login', { mensagemLogin: null});
+    });
+
 }
